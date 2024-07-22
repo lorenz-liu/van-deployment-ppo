@@ -90,6 +90,12 @@ class PPO:
             loss.mean().backward()
             self.optimizer.step()
 
+    def save(self, filename):
+        torch.save(self.policy.state_dict(), filename)
+
+    def load(self, filename):
+        self.policy.load_state_dict(torch.load(filename))
+
 
 class Memory:
     def __init__(self):

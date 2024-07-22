@@ -27,20 +27,33 @@ class VanDeploymentEnv(gym.Env):
         van_idx = action // self.num_vans
         good_idx = action % self.num_vans
 
-        if self.remaining_vans[van_idx] == 0 or self.remaining_goods[good_idx] == 0:
-            reward = -10  # Penalty for invalid action
+        van_capacity = self.remaining_vans[van_idx]
+        good_weight = self.remaining_goods[good_idx]
+
+        if van_capacity == 0 or good_weight == 0:
+            reward = -10  # Penalty for invalid action (already assigned)
+        elif good_weight > van_capacity:
+            reward = -15  # Penalty for overloading the van
         else:
-            van_capacity = self.remaining_vans[van_idx]
-            good_weight = self.remaining_goods[good_idx]
             efficiency = good_weight / van_capacity
             reward = efficiency * 10  # Reward based on efficiency
 
             self.remaining_vans[van_idx] = 0
             self.remaining_goods[good_idx] = 0
 
+        reward -= 0.1  # Small penalty for each step
+
         done = all(v == 0 for v in self.remaining_vans) or all(
             g == 0 for g in self.remaining_goods
         )
+
+        if (
+            done
+            and all(v == 0 for v in self.remaining_vans)
+            and all(g == 0 for g in self.remaining_goods)
+        ):
+            reward += 50  # Bonus for completing all assignments
+
         obs = self._get_observation()
         return obs, reward, done, {}
 

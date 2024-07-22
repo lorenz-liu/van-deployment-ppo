@@ -52,6 +52,14 @@ def train():
                 f"Episode {i_episode}, Average Reward: {sum(memory.rewards)/len(memory.rewards)}"
             )
 
+        if i_episode and i_episode % 1000 == 0:
+            ppo.save(f"./checkpoints/ppo_model_episode_{i_episode}.pth")
+            print(f"Model saved at episode {i_episode}")
+
+    # Save the final model
+    ppo.save("./checkpoints/ppo_model_final.pth")
+    print("Final model saved")
+
 
 if __name__ == "__main__":
     train()
